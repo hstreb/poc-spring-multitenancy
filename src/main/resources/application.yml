@@ -1,0 +1,72 @@
+spring:
+  application:
+    name: poc-spring-multitenancy
+  main:
+    banner-mode: "off"
+
+#app:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/multitenancy
+    username: multitenancy
+    password: multitenancy
+    hikari:
+      connection-timeout: 60000
+      minimum-idle: 1
+      maximum-pool-size: 25
+      idle-timeout: 10000
+
+multi-datasource:
+  hikari:
+    connection-timeout: 60000
+    minimum-idle: 1
+    maximum-pool-size: 5
+    idle-timeout: 10000
+  datasources:
+    tenant1:
+      url: jdbc:postgresql://localhost:5432/multitenancy?currentSchema=tenant1
+      driverClassName: org.postgresql.Driver
+      username: multitenancy
+      password: multitenancy
+      hikari:
+        connection-timeout: 60000
+        minimum-idle: 1
+        maximum-pool-size: 5
+        idle-timeout: 10000
+    tenant2:
+      url: jdbc:postgresql://localhost:5432/multitenancy?currentSchema=tenant2
+      driverClassName: org.postgresql.Driver
+      username: multitenancy
+      password: multitenancy
+      hikari:
+        connection-timeout: 60000
+        minimum-idle: 1
+        maximum-pool-size: 5
+        idle-timeout: 10000
+
+management:
+  server:
+    port: 8081
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  endpoints:
+    web:
+      base-path: /management
+      exposure:
+        include: health,prometheus
+  tracing:
+    sampling:
+      probability: 1.0
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}] tenantId=%X{tenantId:-}"
+
+  level:
+    org:
+      exemplo:
+        multitenancy: DEBUG
+
+security:
+  ignore:
+    urls: /favicon.ico,/management/**
